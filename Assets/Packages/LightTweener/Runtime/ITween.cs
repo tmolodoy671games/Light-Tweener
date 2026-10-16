@@ -6,14 +6,15 @@ using UnityEngine;
 
 namespace LightTweener;
 
-public interface ITween
+public interface ITween : IDisposable
 {
+    void Cancel();
     public static ITween<T> Create<T>(Func<T, T, float, T> interpolator) => new Tween<T>(interpolator);
 
     public static ITween<T> Create<T>() => new Tween<T>(Tween<T>.CreateInterpolator());
 }
 
-public interface ITween<T>
+public interface ITween<T> : ITween
 {
     ITween<T> From(T start);
     ITween<T> To(T target);
@@ -23,7 +24,6 @@ public interface ITween<T>
     ITween<T> Holder(GameObject? target);
     ITween<T> OnUpdate(Action<T>? callback);
     ITween<T> Play();
-    void Cancel();
 }
 
 public sealed class Tween<T> : ITween<T>
@@ -164,6 +164,7 @@ public sealed class Tween<T> : ITween<T>
     private static TValue Unbox<TValue>(T value) => (TValue)(object)value!;
     private static T Box<TValue>(TValue value) => (T)(object)value!;
 
+    public void Dispose() => Cancel();
 }
 
 internal sealed class TweenRunner : MonoBehaviour
