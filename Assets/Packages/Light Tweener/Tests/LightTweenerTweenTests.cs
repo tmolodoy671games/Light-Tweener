@@ -14,10 +14,11 @@ public sealed class LightTweenerTweenTests
     [SetUp]
     public void SetUp() => _holder = new GameObject("LightTweener test holder");
 
-    [TearDown]
-    public void TearDown()
+    [UnityTearDown]
+    public IEnumerator TearDown()
     {
-        if (_holder != null) Object.DestroyImmediate(_holder);
+        if (_holder != null) Object.Destroy(_holder);
+        yield return null;
     }
 
     [Test]
@@ -104,7 +105,7 @@ public sealed class LightTweenerTweenTests
         yield return new WaitForSeconds(0.15f);
 
         CollectionAssert.Contains(values, 0.25f);
-        Assert.That(values[^1], Is.EqualTo(1f));
+        Assert.That(values[values.Count - 1], Is.EqualTo(1f));
     }
 
     [UnityTest]
@@ -159,9 +160,9 @@ public sealed class LightTweenerTweenTests
         var localRotation = Quaternion.Euler(0f, 90f, 0f);
 
         transform.TweenRotationTo(rotation, 0f);
-        transform.TweenLocalRotationTo(localRotation, 0f);
-
         Assert.That(Quaternion.Angle(transform.rotation, rotation), Is.LessThan(0.001f));
+
+        transform.TweenLocalRotationTo(localRotation, 0f);
         Assert.That(Quaternion.Angle(transform.localRotation, localRotation), Is.LessThan(0.001f));
     }
 }

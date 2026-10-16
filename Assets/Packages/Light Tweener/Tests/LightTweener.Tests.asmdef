@@ -3,11 +3,13 @@
   "references": [
     "LightTweener"
   ],
-  "includePlatforms": [
-    "Editor"
-  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
   "optionalUnityReferences": [
     "TestAssemblies"
   ],
-  "autoReferenced": false
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
 }
