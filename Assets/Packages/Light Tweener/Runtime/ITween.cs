@@ -43,13 +43,51 @@ public sealed class Tween<T> : ITween<T>
         _interpolate = ResolveInterpolator();
     }
 
-    public ITween<T> From(T start) { _start = start; return this; }
-    public ITween<T> To(T target) { _end = target; _hasEnd = true; _relative = false; return this; }
-    public ITween<T> By(T delta) { _delta = delta; _hasEnd = true; _relative = true; return this; }
-    public ITween<T> In(float duration) { _duration = Mathf.Max(0f, duration); return Play(); }
-    public ITween<T> Easing(Func<float, float>? easing) { _easing = easing ?? EaseLinear; return this; }
-    public ITween<T> Holder(GameObject? target) { _holder = target; return this; }
-    public ITween<T> OnUpdate(Action<T>? callback) { _onUpdate = callback ?? throw new ArgumentNullException(nameof(callback)); return this; }
+    public ITween<T> From(T start)
+    {
+        _start = start;
+        return this;
+    }
+
+    public ITween<T> To(T target)
+    {
+        _end = target;
+        _hasEnd = true;
+        _relative = false;
+        return this;
+    }
+
+    public ITween<T> By(T delta)
+    {
+        _delta = delta;
+        _hasEnd = true;
+        _relative = true;
+        return this;
+    }
+
+    public ITween<T> In(float duration)
+    {
+        _duration = Mathf.Max(0f, duration);
+        return Play();
+    }
+
+    public ITween<T> Easing(Func<float, float>? easing)
+    {
+        _easing = easing ?? EaseLinear;
+        return this;
+    }
+
+    public ITween<T> Holder(GameObject? target)
+    {
+        _holder = target;
+        return this;
+    }
+
+    public ITween<T> OnUpdate(Action<T>? callback)
+    {
+        _onUpdate = callback ?? throw new ArgumentNullException(nameof(callback));
+        return this;
+    }
 
     public ITween<T> Play()
     {
@@ -71,7 +109,13 @@ public sealed class Tween<T> : ITween<T>
     private IEnumerator Animate()
     {
         _onUpdate(_start);
-        if (_duration <= 0f) { _onUpdate(_end); _coroutine = null; yield break; }
+        if (_duration <= 0f)
+        {
+            _onUpdate(_end);
+            _coroutine = null;
+            yield break;
+        }
+
         var elapsed = 0f;
         while (elapsed < _duration && !_cancelled)
         {
@@ -80,18 +124,25 @@ public sealed class Tween<T> : ITween<T>
             _onUpdate(_interpolate(_start, _end, _easing(t)));
             yield return null;
         }
+
         if (!_cancelled) _onUpdate(_end);
         _coroutine = null;
     }
 
     private static Func<T, T, float, T> ResolveInterpolator()
     {
-        if (typeof(T) == typeof(float)) return (a, b, t) => Box(Mathf.LerpUnclamped(Unbox<float>(a), Unbox<float>(b), t));
-        if (typeof(T) == typeof(Vector2)) return (a, b, t) => Box(Vector2.LerpUnclamped(Unbox<Vector2>(a), Unbox<Vector2>(b), t));
-        if (typeof(T) == typeof(Vector3)) return (a, b, t) => Box(Vector3.LerpUnclamped(Unbox<Vector3>(a), Unbox<Vector3>(b), t));
-        if (typeof(T) == typeof(Vector4)) return (a, b, t) => Box(Vector4.LerpUnclamped(Unbox<Vector4>(a), Unbox<Vector4>(b), t));
-        if (typeof(T) == typeof(Color)) return (a, b, t) => Box(Color.LerpUnclamped(Unbox<Color>(a), Unbox<Color>(b), t));
-        if (typeof(T) == typeof(Quaternion)) return (a, b, t) => Box(Quaternion.SlerpUnclamped(Unbox<Quaternion>(a), Unbox<Quaternion>(b), t));
+        if (typeof(T) == typeof(float))
+            return (a, b, t) => Box(Mathf.LerpUnclamped(Unbox<float>(a), Unbox<float>(b), t));
+        if (typeof(T) == typeof(Vector2))
+            return (a, b, t) => Box(Vector2.LerpUnclamped(Unbox<Vector2>(a), Unbox<Vector2>(b), t));
+        if (typeof(T) == typeof(Vector3))
+            return (a, b, t) => Box(Vector3.LerpUnclamped(Unbox<Vector3>(a), Unbox<Vector3>(b), t));
+        if (typeof(T) == typeof(Vector4))
+            return (a, b, t) => Box(Vector4.LerpUnclamped(Unbox<Vector4>(a), Unbox<Vector4>(b), t));
+        if (typeof(T) == typeof(Color))
+            return (a, b, t) => Box(Color.LerpUnclamped(Unbox<Color>(a), Unbox<Color>(b), t));
+        if (typeof(T) == typeof(Quaternion))
+            return (a, b, t) => Box(Quaternion.SlerpUnclamped(Unbox<Quaternion>(a), Unbox<Quaternion>(b), t));
         throw new NotSupportedException($"No interpolation is registered for {typeof(T).Name}.");
     }
 
@@ -125,6 +176,7 @@ internal sealed class TweenRunner : MonoBehaviour
             DontDestroyOnLoad(go);
             _instance = go.AddComponent<TweenRunner>();
         }
+
         return _instance.StartCoroutine(routine);
     }
 

@@ -1,0 +1,13 @@
+{
+  "name": "LightTweener.Tests",
+  "references": [
+    "LightTweener"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "autoReferenced": false
+}
