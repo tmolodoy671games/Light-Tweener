@@ -4,7 +4,13 @@ using UnityEngine;
 
 namespace Packages.Light_Tweener.Runtime;
 
-/// <summary>A small coroutine-driven tween. Configure it and call Play(), or use a Transform extension.</summary>
+public interface ITween
+{
+    public static ITween<T> Create<T>(Func<T, T, float, T> interpolator) => new Tween<T>(interpolator);
+
+    public static ITween<T> Create<T>() => new Tween<T>(Tween<T>.CreateInterpolator());
+}
+
 public interface ITween<T>
 {
     ITween<T> From(T start);
@@ -16,11 +22,8 @@ public interface ITween<T>
     ITween<T> OnUpdate(Action<T>? callback);
     ITween<T> Play();
     void Cancel();
-
-    public static ITween<T> Create(T start, Action<T> onUpdate) => new Tween<T>(start, onUpdate);
 }
 
-/// <summary>Built-in interpolations are provided for float, Vector2/3/4, Quaternion and Color.</summary>
 public sealed class Tween<T> : ITween<T>
 {
     private readonly Func<T, T, float, T> _interpolate;
@@ -31,16 +34,15 @@ public sealed class Tween<T> : ITween<T>
     private bool _relative;
     private float _duration = 1f;
     private Func<float, float> _easing = EaseLinear;
-    private Action<T> _onUpdate;
+    private Action<T>? _onUpdate;
     private GameObject? _holder;
     private Coroutine? _coroutine;
     private bool _cancelled;
 
-    public Tween(T start, Action<T> onUpdate)
+    public Tween(Func<T, T, float, T> interpolator)
     {
-        _start = start;
-        _onUpdate = onUpdate ?? throw new ArgumentNullException(nameof(onUpdate));
-        _interpolate = ResolveInterpolator();
+        _start = default!;
+        _interpolate = interpolator ?? throw new ArgumentNullException(nameof(interpolator));
     }
 
     public ITween<T> From(T start)
@@ -94,8 +96,9 @@ public sealed class Tween<T> : ITween<T>
         Cancel();
         _cancelled = false;
         if (!_hasEnd) throw new InvalidOperationException("Set To() or By() before playing a tween.");
+        if (_onUpdate == null) throw new InvalidOperationException("Set OnUpdate() before playing a tween.");
         if (_relative) _end = Add(_start, _delta);
-        _coroutine = TweenRunner.Run(_holder, Animate());
+        _coroutine = TweenRunner.Run(_holder, Animate(_onUpdate));
         return this;
     }
 
@@ -106,12 +109,12 @@ public sealed class Tween<T> : ITween<T>
         _coroutine = null;
     }
 
-    private IEnumerator Animate()
+    private IEnumerator Animate(Action<T> onUpdate)
     {
-        _onUpdate(_start);
+        onUpdate(_start);
         if (_duration <= 0f)
         {
-            _onUpdate(_end);
+            onUpdate(_end);
             _coroutine = null;
             yield break;
         }
@@ -121,15 +124,15 @@ public sealed class Tween<T> : ITween<T>
         {
             elapsed += Time.deltaTime;
             var t = Mathf.Clamp01(elapsed / _duration);
-            _onUpdate(_interpolate(_start, _end, _easing(t)));
+            onUpdate(_interpolate(_start, _end, _easing(t)));
             yield return null;
         }
 
-        if (!_cancelled) _onUpdate(_end);
+        if (!_cancelled) onUpdate(_end);
         _coroutine = null;
     }
 
-    private static Func<T, T, float, T> ResolveInterpolator()
+    internal static Func<T, T, float, T> CreateInterpolator()
     {
         if (typeof(T) == typeof(float))
             return (a, b, t) => Box(Mathf.LerpUnclamped(Unbox<float>(a), Unbox<float>(b), t));

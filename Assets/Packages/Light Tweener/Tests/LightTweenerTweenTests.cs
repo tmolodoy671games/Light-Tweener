@@ -26,9 +26,11 @@ public sealed class LightTweenerTweenTests
     {
         var values = new List<float>();
 
-        ITween<float>.Create(2f, values.Add)
+        ITween.Create<float>()
+            .From(2f)
             .To(8f)
             .Holder(_holder)
+            .OnUpdate(values.Add)
             .In(0f);
 
         CollectionAssert.AreEqual(new[] { 2f, 8f }, values);
@@ -39,10 +41,11 @@ public sealed class LightTweenerTweenTests
     {
         var value = -1f;
 
-        ITween<float>.Create(2f, next => value = next)
+        ITween.Create<float>()
             .From(4f)
             .To(9f)
             .Holder(_holder)
+            .OnUpdate(next => value = next)
             .In(0f);
 
         Assert.That(value, Is.EqualTo(9f));
@@ -53,9 +56,11 @@ public sealed class LightTweenerTweenTests
     {
         var value = Vector3.zero;
 
-        ITween<Vector3>.Create(new Vector3(1f, 2f, 3f), next => value = next)
+        ITween.Create<Vector3>()
+            .From(new Vector3(1f, 2f, 3f))
             .By(new Vector3(3f, -1f, 2f))
             .Holder(_holder)
+            .OnUpdate(next => value = next)
             .In(0f);
 
         Assert.That(value, Is.EqualTo(new Vector3(4f, 1f, 5f)));
@@ -64,7 +69,10 @@ public sealed class LightTweenerTweenTests
     [Test]
     public void PlayWithoutTarget_Throws()
     {
-        var tween = ITween<float>.Create(0f, _ => { }).Holder(_holder);
+        var tween = ITween.Create<float>()
+            .From(0f)
+            .OnUpdate(_ => { })
+            .Holder(_holder);
 
         Assert.Throws<System.InvalidOperationException>(() => tween.Play());
     }
@@ -72,7 +80,25 @@ public sealed class LightTweenerTweenTests
     [Test]
     public void UnsupportedType_Throws()
     {
-        Assert.Throws<System.NotSupportedException>(() => ITween<string>.Create("start", _ => { }));
+        Assert.Throws<System.NotSupportedException>(() => ITween.Create<string>());
+    }
+
+    [UnityTest]
+    public IEnumerator CustomInterpolator_CanTweenCustomType()
+    {
+        var values = new List<string>();
+        var tween = ITween.Create<string>((from, to, t) => "custom");
+
+        tween.From("start")
+            .To("target")
+            .OnUpdate(values.Add)
+            .Holder(_holder)
+            .In(1f);
+
+        yield return null;
+
+        CollectionAssert.Contains(values, "custom");
+        tween.Cancel();
     }
 
     [UnityTest]
@@ -80,9 +106,11 @@ public sealed class LightTweenerTweenTests
     {
         var value = 0f;
 
-        ITween<float>.Create(0f, next => value = next)
+        ITween.Create<float>()
+            .From(0f)
             .To(1f)
             .Holder(_holder)
+            .OnUpdate(next => value = next)
             .In(0.05f);
 
         yield return new WaitForSeconds(0.1f);
@@ -95,10 +123,12 @@ public sealed class LightTweenerTweenTests
     {
         var values = new List<float>();
 
-        ITween<float>.Create(0f, values.Add)
+        ITween.Create<float>()
+            .From(0f)
             .To(1f)
             .Easing(_ => 0.25f)
             .Holder(_holder)
+            .OnUpdate(values.Add)
             .In(0.1f);
 
         yield return null;
@@ -112,9 +142,11 @@ public sealed class LightTweenerTweenTests
     public IEnumerator Cancel_StopsFurtherUpdates()
     {
         var value = 0f;
-        var tween = ITween<float>.Create(0f, next => value = next)
+        var tween = ITween.Create<float>()
+            .From(0f)
             .To(10f)
             .Holder(_holder)
+            .OnUpdate(next => value = next)
             .In(1f);
 
         yield return null;
