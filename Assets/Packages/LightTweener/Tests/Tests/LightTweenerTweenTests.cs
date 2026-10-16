@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using LightTweener;
 using NUnit.Framework;
-using Packages.Light_Tweener.Runtime;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Packages.Light_Tweener.Tests;
+// ReSharper disable CheckNamespace
+
+namespace LightTweener.Tests;
 
 public sealed class LightTweenerTweenTests
 {

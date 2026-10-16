@@ -1,0 +1,11 @@
+{
+  "name": "t.molodoy.lightweener",
+  "version": "0.0.1",
+  "displayName": "Light Tweener",
+  "description": "Light Tweener",
+  "unity": "2021.3",
+  "author": {
+    "name": "T. Molodoy",
+    "email": "tmolodoy671games@gmail.com"
+  }
+}

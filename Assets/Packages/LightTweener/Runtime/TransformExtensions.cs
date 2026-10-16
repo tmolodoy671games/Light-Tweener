@@ -1,6 +1,8 @@
 using UnityEngine;
 
-namespace Packages.Light_Tweener.Runtime;
+// ReSharper disable CheckNamespace
+
+namespace LightTweener;
 
 public static class TransformExtensions
 {

@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-namespace Packages.Light_Tweener.Runtime;
+// ReSharper disable CheckNamespace
+
+namespace LightTweener;
 
 public interface ITween
 {
@@ -33,7 +35,7 @@ public sealed class Tween<T> : ITween<T>
     private bool _hasEnd;
     private bool _relative;
     private float _duration = 1f;
-    private Func<float, float> _easing = EaseLinear;
+    private Func<float, float> _easing = LightTweener.Easing.EaseInOut;
     private Action<T>? _onUpdate;
     private GameObject? _holder;
     private Coroutine? _coroutine;
@@ -75,7 +77,7 @@ public sealed class Tween<T> : ITween<T>
 
     public ITween<T> Easing(Func<float, float>? easing)
     {
-        _easing = easing ?? EaseLinear;
+        _easing = easing ?? LightTweener.Easing.EaseInOut;
         return this;
     }
 
@@ -162,7 +164,6 @@ public sealed class Tween<T> : ITween<T>
     private static TValue Unbox<TValue>(T value) => (TValue)(object)value!;
     private static T Box<TValue>(TValue value) => (T)(object)value!;
 
-    private static float EaseLinear(float t) => t;
 }
 
 internal sealed class TweenRunner : MonoBehaviour
